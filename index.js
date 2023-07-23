@@ -1,8 +1,10 @@
 const introMusic = new Audio("./music/introSong.mp3");
+const gameStartMusic = new Audio("./music/game_start.mp3");
 const gameOverSound = new Audio("./music/gameOver.mp3");
 const heavyWeaponSound = new Audio("./music/heavyWeapon.mp3");
 const hugeWeaponSound = new Audio("./music/hugeWeapon.mp3");
 const killEnemySound = new Audio("./music/killEnemy.mp3");
+const killEnemySound_2 = new Audio("./music/killEnemy_2.mp3");
 const shootingSound = new Audio("./music/shoooting.mp3");
 
 introMusic.play();
@@ -16,6 +18,9 @@ const context = canvas.getContext("2d");
 let difficulty = 2;
 const form = document.querySelector("form");
 const scoreBoard = document.querySelector(".scoreBoard");
+
+let xDistance = 0;
+let yDistance = 0;
 
 const lightWeaponDamage = 10;
 const heavyWeaponDamage = 20;
@@ -123,22 +128,27 @@ class HugeWeapon {
     ) {
         this.x = x;
         this.y = y;
-        // this.radius = radius;
+        this.radius = 0;
         this.color = "white";
         // this.velocity = velocity;
         // this.damage = damage;
     }
     draw() {
         context.beginPath();
-        // context.arc(this.x, this.y, this.radius, Math.PI / 180 * 0, Math.PI / 180 * 360, false);
-        context.fillStyle = this.color;
-        context.fillRect(this.x, this.y, 200, canvas.height);
-        context.fillStyle = this.color;
+        // context.fillStyle = this.color;
+        context.arc(this.x, this.y, this.radius, Math.PI / 180 * 0, Math.PI / 180 * 360, false);
+        // context.fillRect(this.x, this.y, 200, canvas.height);
+        // context.fillStyle = this.color;
         // context.fill();
+        context.strokeStyle = this.color;
+
+        context.stroke();
+
     }
     update() {
         this.draw();
-        this.x += 20;
+        this.radius += 10;
+        // this.x += 20;
         // this.y += 10;
     }
 }
@@ -192,7 +202,7 @@ class Particle {
     }
 }
 
-const parth = new Player(playerPosition.x, playerPosition.y, 15, "white");
+const parth = new Player(playerPosition.x - xDistance, playerPosition.y - yDistance, 15, "white");
 
 const weapons = [];
 const enemies = [];
@@ -252,7 +262,7 @@ function animation() {
     });
 
     hugeWeapons.forEach((hugeWeapon, hugeWeaponIndex) => {
-        if (hugeWeapon.x > canvas.width) {
+        if (hugeWeapon.radius > canvas.width) {
             hugeWeapons.splice(hugeWeaponIndex, 1);
         } else {
             hugeWeapon.update();
@@ -291,13 +301,15 @@ function animation() {
         }
 
         hugeWeapons.forEach((hugeWeapon) => {
-            const distanceBetweenHugeWeaponAndEnemy = hugeWeapon.x - enemy.x;
-            if (distanceBetweenHugeWeaponAndEnemy <= 200 && distanceBetweenHugeWeaponAndEnemy >= -200) {
+            const distanceBetweenHugeWeaponAndEnemy = hugeWeapon.radius - distanceBetweenPlayerAndEnemy;
+            if (distanceBetweenHugeWeaponAndEnemy <= 10
+                && distanceBetweenHugeWeaponAndEnemy >= -10
+            ) {
                 playerScore += 10;
                 scoreBoard.innerHTML = `Score : ${playerScore}`;
                 setTimeout(() => {
-                    killEnemySound.play();
-                    enemies.splice(enemyIndex, 1)
+                    killEnemySound_2.play();
+                    enemies.splice(enemyIndex, 1);
                 }, 0);
             }
         })
@@ -371,12 +383,17 @@ addEventListener("keypress", (e) => {
         playerScore -= 20;
         scoreBoard.innerHTML = `Score : ${playerScore}`;
         hugeWeaponSound.play();
-        hugeWeapons.push(new HugeWeapon(0, 0,
+        hugeWeapons.push(new HugeWeapon(playerPosition.x, playerPosition.y,
             // 30, 
             // `rgb(81,55,194)`,
             // velocity,
             // hugeWeaponDamage
         ));
+    }
+});
+addEventListener("keypress", (e) => {
+    if (e.key === "w") {
+        yDistance -= 50;
     }
 });
 
